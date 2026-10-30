@@ -1,0 +1,215 @@
+Skip to main content
+AI System Reconnaissance
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+
+
+50
+
+0
+
+
+User profile photo.
+
+AI Security
+Secure AI Systems
+AI System Reconnaissance
+Room Icon
+AI System Reconnaissance
+Discover AI infrastructure by scanning ML services, frameworks, and extracting metadata from APIs.
+
+
+90 min
+
+13,961
+
+User profile photo.
+User profile photo.
+User profile photo.
+Show Split View
+
+Save Room
+
+173 Recommend
+
+Connectivity
+Options
+Room progress: 50%
+
+Task 1
+Introduction
+
+Task 2
+The AI Infrastructure Stack
+
+Task 3
+Fingerprinting AI Services
+
+Open Agent
+In Task 2, we built a mental map of the AI infrastructure stack: components, ports, and protocols. Now we need to figure out what is actually running behind each open port. This is where fingerprinting comes in. Standard service detection (Nmap -sV) often mislabels AI services. It sees HTTP on port 8000 and calls it "http-alt" It sees gRPC on port 8001 and does not know what to do with it. If you rely on the default Nmap output alone, you will miss what these services actually are.
+
+Fingerprinting AI services requires a different approach; you need to look at:
+
+HTTP headers
+JSON response structures
+Error messages
+Endpoint naming conventions
+Each AI framework has its own distinct signature, and once you know what to look for, identification becomes quick and reliable.
+
+
+
+HTTP Header Fingerprinting
+Response headers are often the fastest way to identify an AI framework. Many inference engines broadcast their identity unless an administrator specifically masks them behind a reverse proxy.
+
+TorchServe returns a Server: TorchServe/0.x.x header.
+That is a direct identification with no ambiguity.
+Triton Inference Server includes a NV-Status header in its responses.
+It also responds to a specific request header: if you send endpoint-load-metrics-format: text, triton returns hardware telemetry (CPU and GPU utilisation numbers) directly in the response headers.
+No other framework does this: if you see GPU utilisation data in an HTTP header, you are talking to Triton.
+FastAPI-based ML services show server: uvicorn in the response.
+When you combine that with routes like /predict or /embeddings, you have a strong indicator of a Python ML backend.
+OpenAI-compatible wrappers (vLLM, LiteLLM, Ollama) return x-request-id headers and structured JSON with an "object": "model" field on their /v1/models endpoint.
+API Response Signatures
+Each framework returns distinctly structured JSON. Once you have seen these a few times, you can identify the framework from the response body alone.
+
+TensorFlow Serving returns: {"model_version_status": [{"version": "1", "state": "AVAILABLE"}]}
+Triton returns: {"name": "fraud_detector", "versions": ["1"], "platform": "tensorflow_graphdef"}
+MLflow error responses include stack traces referencing mlflow.server and mlflow.tracking namespaces.
+Even the error tells you what you are talking to.
+OpenAI-compatible endpoints return: {"object": "model", "id": "llama-3.1-8b", "created": 1700000000}
+If you hit an endpoint and get back JSON containing "object" : "model", you are talking to something that speaks the OpenAI API format. That narrows it down to vLLM, LiteLLM, Ollama, or a custom wrapper.
+
+Error Message Fingerprinting
+This is one of the most reliable identification techniques, and it works because AI inference APIs are rigid. They expect specific tensor shapes and data types. Send something wrong, and they complain in ways that reveal exactly what they are.
+
+The technique is simple: send a deliberately malformed payload and read the error response.
+
+Send a flat list of integers to a TensorFlow Serving endpoint that expects a complex tensor object, and you get back an error mentioning tensorinfo_map. That string only appears in TF Serving errors.
+Send a bad request to an MLflow server, and the stack trace references mlflow.server, mlflow.tracking, or databricks namespaces.
+MLflow path traversal errors (CVE-2024-1558) go further, exposing full server filesystem paths.
+Databricks Mosaic AI returns Java exceptions  io.jsonwebtoken.IncorrectClaimException for malformed tokens. That is an instant identifier.
+The reason this technique works so well is that AI frameworks produce errors that are much more verbose than those in traditional web applications. Data scientists need detailed debugging information during model development. Those debug-friendly defaults rarely get turned off before production deployment.
+
+Endpoint Naming Conventions
+Traditional REST APIs use resource nouns: /users, /accounts, /products. AI endpoints use computational action terms that stand out immediately during directory brute-forcing.
+
+Inference endpoints: /predict, /invocations (the SageMaker convention), /infer, /generate, /embeddings, /score
+Model management: /v1/models, /v2/models
+MLflow internal API: /api/2.0/mlflow/ (this prefix is distinctive and does not appear in any other framework)
+Kubeflow pipelines: /pipeline/apis/v1beta1/
+If you are running ffuf or feroxbuster against a target, add these paths to your wordlist. Standard wordlists from SecLists will not include them.
+
+gRPC Fingerprinting
+Many AI services expose gRPC alongside HTTP.
+
+Triton uses gRPC on port 8001.
+TensorFlow Serving uses it on port 8500.
+Traditional HTTP scanners miss these entirely because gRPC is a binary protocol that does not respond to standard HTTP probes.
+
+The tool for this is grpcurl. If gRPC reflection is enabled (common in development environments that get pushed to production without hardening), you can dump the entire protobuf schema:
+
+grpcurl -plaintext target:8001 list
+grpcurl -plaintext target:8001 describe inference.GRPCInferenceService
+That output reveals all available RPCs, the exact structure of every input tensor, and the format of every output. Think of it as the gRPC equivalent of finding a /openapi.json file on a REST API.
+
+TLS Fingerprinting (JA3/JA4)
+AI deployments have distinctive TLS signatures because internal service-to-service traffic is dominated by Python libraries (requests, urllib, gRPC implementations) rather than web browsers. JA3 and JA4 hash analysis can differentiate automated ML pipeline traffic from human web browsing at the network level.
+
+The GreyNoise research we will cover in the case study below found that 99% of the attack traffic in one campaign shared the same JA4H signature, despite originating from 62 different IP addresses across 27 countries. That kind of uniformity points to shared automation tooling, and it is exactly what JA4 fingerprinting is designed to catch.
+
+Case Study: GreyNoise LLM Endpoint Reconnaissance
+Between October 2025 and January 2026, GreyNoise captured over 91,000 attack sessions targeting AI deployments through their Ollama honeypot infrastructure. One campaign stood out. Over 11 days starting December 28, attackers generated 80,000+ requests probing conversational endpoints to determine whether each target was compatible with OpenAI, Gemini, or Anthropic API schemas. They targeted over 73 different LLM model endpoints, including GPT-4o variants, Claude models, Llama, Gemini, DeepSeek, Mistral, Qwen, and Grok.
+
+The fingerprinting technique was simple and effective. The attackers sent innocuous prompts: "hi" appeared 32,716 times. "How many states are there in the United States?" appeared 27,778 times. "How many letter 'r' are in the word strawberry?" was another common test. These prompts were not random. Each one produces a response that differs in structure, format, and content depending on which model is running behind the endpoint. By comparing the response format to known API schemas, the attackers could identify the exact model and proxy configuration without triggering any content moderation filters.
+
+GreyNoise traced the IPs and found overlap with infrastructure previously used to exploit over 200 known CVEs, including React2Shell (CVE-2025-55182). Their assessment: "Professional threat actor conducting reconnaissance. The infrastructure overlap with established CVE-scanning operations suggests that this enumeration feeds into a larger exploitation pipeline. They're building target lists."
+
+This is AI fingerprinting at scale. No exploitation. No payloads. Just systematic identification of what is deployed and how it responds.
+
+Agent Exercise
+Let's fingerprint the services you discovered in Task 2. Open the Cyphira Service Prober agent below. You know the IPs and ports from your scan results. Now you need to figure out what framework is running behind each one.
+
+Step 1: Check the HTTP headers on the MLflow host.
+
+Run the following command against the service you found on port 5000: 
+curl -v http://10.10.45.12:5000/
+Look at the Server header in the response.
+What does it tell you about the framework?
+Step 2: Probe the inference server's model endpoint.
+
+Run this against the service on port 8000: 
+curl http://10.10.45.15:8000/v2/models
+Examine the JSON response.
+Look for the platform field.
+This tells you which ML framework built each model.
+Step 3: Trigger an error message.
+
+Send a malformed request to the inference endpoint: 
+curl -X POST http://10.10.45.15:8000/v2/models/fraud_detector/infer -d '{"bad": "data"}'
+Read the error response.
+It will contain specific field names and data type expectations that confirm the framework identity.
+Step 4: Check for gRPC reflection.
+
+Run this against the gRPC port you found on the same host: 
+grpcurl -plaintext 10.10.45.15:8001 list
+If reflection is enabled (a feature that lets any client query the server for its full API schema without prior knowledge), you will see the complete list of available services.
+Step 5: Probe the remaining services.
+
+Check the vector database and Jupyter notebook hosts: 
+curl http://10.10.45.18:6333/collections
+curl http://10.10.45.20:8888/api/kernels
+Note what each response reveals about the service.
+Save your findings for Task 4.
+Submit your findings by answering the questions below.
+
+Answer the questions below
+Which unique HTTP response header does the service on 10.10.45.15:8000 return to identify as an NVIDIA product?
+
+NV-Status
+
+Correct Answer
+
+When you run grpcurl against 10.10.45.15:8001, what is the name of the inference service listed in the reflection output?
+
+inference.GRPCInferenceService
+
+Correct Answer
+
+
+Task 4
+Enumerating AI Systems
+
+Task 5
+Mapping the AI Attack Surface
+
+Task 6
+Structured Reconnaissance Methodology and Detection
+
+Task 7
+Conclusion
+How likely are you to recommend this room to others?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Submit now
+
+

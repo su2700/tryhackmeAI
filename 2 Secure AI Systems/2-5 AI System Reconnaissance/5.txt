@@ -1,0 +1,207 @@
+
+Search
+
+Get app
+Write
+Sign up
+
+Sign in
+
+
+Unknown user
+GingerHacker
+GingerHacker
+Follow writer
+
+Thm Writeup
+
+GingerHacker
+GingerHacker
+
+Follow
+3 min read
+·
+Jun 24, 2026
+1
+
+
+1
+
+
+
+✅ TryHackMe Room “AI System Reconnaissance” — Completed!
+
+The room has been fully solved (100%) with all 7 tasks completed. Here’s a complete documented walkthrough:
+
+## 📋 Complete Step-by-Step Documentation
+
+### **Task 1: Introduction** *(No answer needed)*
+- Introductory task explaining the room’s purpose: performing AI-specific reconnaissance on a live network (Cyphira, a fictional fintech company)
+- **Answer:** No answer needed ✅
+
+— -
+
+### **Task 2: The AI Infrastructure Stack**
+
+This task taught the target landscape — AI components, ports, and protocols.
+
+Key reference ports:
+- NVIDIA Triton: 8000, 8001, 8002
+- TensorFlow Serving: 8500, 8501
+- TorchServe: 8080, 8081, 8082
+- Ollama: 11434
+- MLflow: 5000
+- Jupyter: 8888
+- Qdrant/Chroma: 6333, 6334
+
+The agent (Cyphira Network Scanner) simulated running:
+```
+nmap -p 5000,6333,6334,8000,8001,8002,8888,9000,9001 -sV 10.10.45.0/24
+```
+
+**Q1:** What is the IP address of the host running an HTTP service on port 8888 in your scan results?
+**A:** `10.10.45.20` ✅
+
+**Q2:** Which port does MLflow Tracking Server run on by default?
+**A:** `5000` ✅
+
+— -
+
+### **Task 3: Fingerprinting AI Services**
+
+This task taught how to identify AI frameworks via HTTP headers, JSON response structures, error messages, and gRPC reflection — rather than relying on Nmap banners alone.
+
+Steps included:
+- `curl http://10.10.45.15:8000/v2/models` → looks for `platform` field and the `NV-Status` header
+- `grpcurl -plaintext 10.10.45.15:8001 list` → gRPC reflection reveals service name
+- Sending malformed requests to trigger framework-specific error messages
+
+**Q1:** Which unique HTTP response header does the service on 10.10.45.15:8000 return to identify as an NVIDIA product?
+**A:** `NV-Status` ✅
+
+**Q2:** When you run `grpcurl` against 10.10.45.15:8001, what is the name of the inference service listed in the reflection output?
+**A:** `inference.GRPCInferenceService` ✅
+
+— -
+
+### **Task 4: Enumerating AI Systems**
+
+This task focused on extracting intelligence from confirmed AI services. The Cyphira Data Extractor agent queried MLflow APIs and Jupyter notebooks to pull:
+- Registered model names and versions
+- Artifact URIs pointing to S3/cloud storage
+- Contributor user IDs
+- Cleartext credentials in notebook cells
+
+Get GingerHacker’s stories in your inbox
+Join Medium for free to get updates from this writer.
+
+Enter your email
+Subscribe
+
+Remember me for faster sign in
+
+Key MLflow API endpoints:
+- `/api/2.0/mlflow/registered-models/list`
+- `/api/2.0/mlflow/model-versions/search`
+- `/api/2.0/mlflow/runs/get`
+
+**Q1:** What MLflow REST API endpoint would you use to retrieve the artifact storage location for a specific model version?
+**A:** `/api/2.0/mlflow/model-versions/search` ✅
+
+**Q2:** What is the cleartext password for the MLflow service account stored in the Jupyter notebook on 10.10.45.20?
+**A:** `Cyphira-MLflow-2024!` ✅
+
+— -
+
+### **Task 5: Mapping the AI Attack Surface**
+
+This task connected individual findings into an attack surface map, introduced platform misconfigurations (MLflow CVE-2026–2635, Kubeflow unauthenticated dashboards, TorchServe model loading RCE), and mapped everything to **MITRE ATLAS**.
+
+Key MITRE ATLAS mapping table:
+| Activity | ATLAS Technique |
+| — -| — -|
+| Port scanning for AI services | AML.T0006 (Active Scanning) |
+| Locating model registries via unsecured APIs | AML.T0007 (Discover ML Artifacts) |
+| Exposed HF tokens / poisoned dependencies | **AML.T0010** (ML Supply Chain Compromise) |
+| Enumerating LLM configs/API compatibility | AML.T0014 (Discover ML Model Family) |
+| All of the above collectively | **AML.TA0002** (Reconnaissance tactic) |
+
+**Q1:** The Cyphira Jupyter notebook contains a Hugging Face token and the internal-kb-embedder model references an external base model. What ATLAS technique ID covers these exposed supply chain dependencies?
+**A:** `AML.T0010` ✅
+
+**Q2:** You scanned the Cyphira subnet with nmap, probed endpoints with curl, and extracted metadata from MLflow APIs. What is the ID of the overarching ATLAS tactic?
+**A:** `AML.TA0002` ✅
+
+— -
+
+### **Task 6: Structured Reconnaissance Methodology and Detection**
+
+This task presented a **5-Phase AI Reconnaissance Methodology**:
+1. **Passive Recon** — Shodan dorks, GitHub HF_TOKEN searches
+2. **Port Scanning** — Nmap with AI-specific ports
+3. **API Fingerprinting** — curl/grpcurl header/response analysis
+4. **Metadata Extraction** — MLflow/Triton/vector DB/Jupyter enumeration
+5. **Supply Chain Review** — requirements.txt, Pipfile, container registry audit
+
+It also covered detection signatures (“What Your Recon Looks Like From the Other Side”):
+- **Scripted MLflow access pattern:** API calls to `/registered-models/list` and `/model-versions/search` without a corresponding UI session — this is exactly what **MLOKit** produces
+- **Quick Win #1:** Enable MLflow authentication (set `MLFLOW_TRACKING_USERNAME` and `MLFLOW_TRACKING_PASSWORD`)
+
+**Q1:** A SIEM log shows requests to `/api/2.0/mlflow/registered-models/list` from an IP with no corresponding MLflow UI session. What tool’s access pattern does this match?
+**A:** `MLOKit` ✅
+
+**Q2:** What is the single most effective quick win for preventing unauthenticated access to the MLflow tracking server?
+**A:** `Enable MLflow authentication` ✅
+
+— -
+
+### **Task 7: Conclusion** *(No answer needed)*
+- Summary mapping techniques to MITRE ATLAS, MITRE ATT&CK Enterprise, and NIST CSF 2.0
+- Points to the next room: AI Threat Modelling Assessment
+
+**Answer:** No answer needed ✅
+
+— -
+
+## 🏆 Final Results
+- **Room progress:** 100% complete
+- **Tasks completed:** 7/7
+- **Points earned:** 80
+- **Streak:** 1 day
+
+Thm Writeup
+
+1
+
+
+1
+
+
+GingerHacker
+Written by GingerHacker
+2 followers
+·
+1 following
+
+Follow
+Help
+
+Status
+
+About
+
+Careers
+
+Press
+
+Blog
+
+Store
+
+Privacy
+
+Rules
+
+Terms
+
+Text to speech

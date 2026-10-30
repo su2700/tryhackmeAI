@@ -1,0 +1,215 @@
+Skip to main content
+AI System Reconnaissance
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+
+
+50
+
+0
+
+
+User profile photo.
+
+AI Security
+Secure AI Systems
+AI System Reconnaissance
+Room Icon
+AI System Reconnaissance
+Discover AI infrastructure by scanning ML services, frameworks, and extracting metadata from APIs.
+
+
+90 min
+
+13,961
+
+User profile photo.
+User profile photo.
+User profile photo.
+Show Split View
+
+Save Room
+
+173 Recommend
+
+Connectivity
+Options
+Room progress: 50%
+
+Task 1
+Introduction
+
+Task 2
+The AI Infrastructure Stack
+
+Open Agent
+Now that we know what this room is about, let's talk about what you are actually looking for. When you scan a traditional network, you know what to expect. Web servers on ports 80 and 443. SSH on 22. Databases on 3306 or 5432. You have seen these a hundred times. AI infrastructure looks nothing like that. It runs on ports most security professionals have never targeted, speaks protocols that standard HTTP scanners misinterpret, and exposes APIs that return data formats you will not find in any conventional web application.
+
+Before we start probing anything, we need a mental map of the components. Think of this task as building your target list.
+
+The AI Infrastructure Stack
+An example description of an AI Infrastructure.
+
+A production AI system is not a single server. It is a collection of specialised services that handle different parts of the machine learning lifecycle. Here is what you will encounter during reconnaissance.
+
+Model Serving Endpoints
+
+These are the frameworks that load trained models into memory and expose prediction APIs. They are the front door of any AI deployment.
+
+NVIDIA Triton Inference Server is one of the most common. It exposes HTTP on port 8000, gRPC on port 8001, and Prometheus metrics on port 8002. Three ports for one service.
+TensorFlow Serving uses gRPC on 8500 and HTTP on 8501.
+TorchServe exposes inference on 8080, a management API on 8081, and metrics on 8082.
+For LLM-specific deployments, Ollama runs on port 11434, and vLLM typically serves on port 8000. Both expose OpenAI-compatible API formats.
+Why do many of these expose both HTTP and gRPC at the same time? gRPC is faster for streaming large tensor payloads between internal services. HTTP/REST is easier for client applications to consume. So they run both.
+
+Orchestration and Experiment Tracking
+
+These platforms manage the entire ML lifecycle, from experiment design through to model deployment. They are the highest-value targets during reconnaissance because they contain everything.
+
+MLflow Tracking Server runs on port 5000.
+It records every experiment, every hyperparameter configuration, every training metric, and every model artifact the organisation produces.
+If you find an open MLflow instance, you have found their complete ML research history.
+Kubeflow runs on Kubernetes (ports 80/443) and orchestrates training pipelines, notebook servers, and model deployments.
+Ray exposes a dashboard on port 8265 and a server endpoint on port 8000.
+The ShadowRay campaign we mentioned in Task 1 targeted exactly this dashboard.
+
+Vector Databases
+
+These store embeddings (numerical representations of documents) and power semantic search for RAG pipelines. If an organisation has an AI chatbot or knowledge assistant, there is almost certainly a vector database behind it.
+
+Qdrant runs on port 6333 for HTTP and 6334 for gRPC.
+Weaviate runs on port 8080 and includes a GraphQL endpoint. Milvus uses port 19530.
+Chroma runs on port 8000.
+What makes these interesting from a recon perspective is that their schema endpoints reveal which embedding model the system uses and what kind of data it contains. A collection called "internal-hr-policies" with 768-dimensional vectors tells you quite a lot about what that RAG system is doing.
+
+Model Registries
+
+A model registry stores the actual model files. Serialised .pkl, .pt, .onnx, and .mar files, along with version history, stage transitions (staging, production, archived), artifact URIs pointing to cloud storage, and the identity of who created each version. An unsecured registry is the single highest-value reconnaissance target. It maps the organisation's entire ML product portfolio in one place.
+
+Supporting Infrastructure
+
+Jupyter notebooks (port 8888) often run with --ip=0.0.0.0 and no authentication. That gives direct terminal access to anyone who reaches the port. Data scientists also routinely store cleartext credentials in notebook cells.
+MinIO (ports 9000 and 9001) provides S3-compatible object storage for model artifacts. Bucket listing is frequently enabled.
+Prometheus metrics endpoints on model servers (Triton on 8002, TorchServe on 8082) leak model names, batch sizes, GPU utilisation, and inference latency. You can map the entire deployment topology without ever touching the inference API.
+Port and Protocol Reference
+Here is the reference table you will use for the rest of this room. Keep it handy.
+
+Component	Default Port(s)	Protocol(s)	Recon Endpoints
+NVIDIA Triton
+(Loads models into memory and serves predictions at scale)	8000, 8001, 8002	HTTP, gRPC, Prometheus	/v2/health/ready, /v2/models
+TensorFlow Serving
+(Google's model serving framework for TensorFlow models)	8500, 8501	gRPC, HTTP	/v1/models/<name>
+TorchServe
+(PyTorch's official model serving framework)	8080, 8081, 8082	HTTP	/ping, /models
+Ollama
+(Local runtime for running LLMs on your own hardware)	11434	HTTP	/api/tags, /api/show
+vLLM
+(High-throughput LLM serving engine with OpenAI-compatible API)	8000	HTTP	/v1/models
+MLflow
+(Tracks experiments, stores models, and manages the ML lifecycle)	5000	HTTP	/api/2.0/mlflow/experiments/search
+Kubeflow
+(Kubernetes-native platform for orchestrating ML pipelines)	80, 443	HTTP	/pipeline/apis/v1beta1/pipelines
+Ray
+(Distributed compute framework for scaling AI workloads)	8265, 8000	HTTP	/api/jobs/, Ray Dashboard
+Qdrant
+(Vector database for semantic search and RAG pipelines)	6333, 6334	HTTP, gRPC	/collections
+Weaviate
+(Vector database with built-in GraphQL and module system)	8080	HTTP, GraphQL	/v1/schema, /v1/meta
+Milvus
+(Distributed vector database for large-scale embedding storage)	19530	gRPC	Port 19530 connection
+Jupyter Notebook
+(Interactive coding environment used by data scientists)	8888	HTTP	/api/kernels, /api/contents
+MinIO
+(S3-compatible object storage often used for model artifacts)	9000, 9001	HTTP (S3-compatible)	Bucket listing
+Prometheus metrics
+(Not a standalone AI service; exposed by Triton on 8002, TorchServe on 8082, and other ML servers as a built-in monitoring endpoint)	8002, 8082	HTTP	/metrics
+That is 14 components across 20+ ports. Compare that to a traditional web application, which might add 3 to 5 ports to a network. Adding an AI stack roughly triples the attack surface at the network layer alone.
+
+Case Study: What Exposed AI Infrastructure Actually Looks Like
+In Task 1, we mentioned that a January 2026 Shodan scan found 42,665 exposed AI agent instances. Let's break down what those instances actually were, because the number alone does not tell you much. The detail does. The most commonly exposed services included MLflow dashboards sitting on port 5000 with no authentication. Unauthenticated Jupyter notebooks on port 8888, some already compromised with cryptomining malware (Monero miners like peer2profit), deployed by earlier attackers who found them first. Open Ray dashboards on port 8265. Triton inference endpoints on port 8000.
+
+These were not isolated findings. They were connected systems. IBM X-Force documented this pattern in their 2025 research on ML training infrastructure attacks. In one case, they mapped a complete chain: a Jupyter notebook running on Azure ML contained cleartext MLflow credentials in a notebook cell. Those credentials pointed to an MLflow tracking server. The MLflow server's model registry contained artifact URIs pointing to S3 storage buckets holding the actual model files. Every component trusted the network boundary, so compromising one compromised the rest.
+
+The Shodan dorks that found these services were not complicated:
+
+port:5000 "MLflow" for exposed MLflow instances
+port:8888 title:"Home Page - Select or create a notebook" for unauthenticated Jupyter notebooks
+http.title:"Ray Dashboard" for exposed Ray cluster dashboards
+port:8001 "triton" for Triton gRPC endpoints
+Simple queries. Massive results. That is why the port reference table above matters. If you know the ports and the service banners, finding AI infrastructure is not hard. The hard part is knowing to look in the first place.
+
+Agent Exercise
+Now let's put what you learned into practice. Open the Cyphira Network Scanner agent.
+
+You are starting the Cyphira AI Audit. The internal subnet is 10.10.45.0/24. Your job is to find every AI component on this network.
+
+Step 1: Scan for AI services.
+
+Run the following Nmap command against the subnet, targeting the AI-specific ports from the reference table:
+nmap -p 5000,6333,6334,8000,8001,8002,8888,9000,9001 -sV 10.10.45.0/24
+Review the results.
+Note which hosts have open ports and what service strings Nmap reports for each one.
+Step 2: Identify the AI components.
+
+Now check for standard services to get the full picture: 
+nmap -p 22,80,443,5432 -sV 10.10.45.0/24
+Compare these results against Step 1.
+Which hosts are running only traditional services? Which are running AI infrastructure?
+Step 3: Spot the non-obvious ones.
+
+Using the port reference table from this task, match each open AI port to the component it likely belongs to. Note down the IP address, port, and your best guess at the component. You will confirm your identification in Task 3.
+
+Submit your findings by answering the questions below.
+
+Answer the questions below
+What is the IP address of the host running an HTTP service on port 8888 in your scan results?
+
+10.10.45.20
+
+Correct Answer
+
+Which port does MLflow Tracking Server run on by default?
+
+5000
+
+Correct Answer
+
+
+Task 3
+Fingerprinting AI Services
+
+Task 4
+Enumerating AI Systems
+
+Task 5
+Mapping the AI Attack Surface
+
+Task 6
+Structured Reconnaissance Methodology and Detection
+
+Task 7
+Conclusion
+How likely are you to recommend this room to others?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Submit now

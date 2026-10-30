@@ -1,0 +1,103 @@
+Skip to main content
+TryHackMe | Jailbreaking
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+1
+
+29
+
+2
+
+
+User profile photo.
+
+AI Security
+Prompt Security
+Jailbreaking
+Room Icon
+Jailbreaking
+Premium room
+Explore jailbreaking techniques to bypass an AI model’s safety and policy restrictions.
+
+
+60 min
+
+8,044
+
+User profile photo.
+User profile photo.
+
+Save Room
+
+88 Recommend
+
+Connectivity
+Options
+Room progress: 50%
+
+Task 1
+Introduction
+
+Task 2
+Prompt Injection vs Jailbreaking
+
+Task 3
+Why Models Have "Jails"
+
+Task 4
+Classic Jailbreak Techniques
+
+Task 5
+Multi-turn Jailbreaking & Conditioning
+
+Task 6
+Case Study: Dan & the AI Security Community
+
+Task 7
+Challenge
+
+Open Agent
+TryJailbreakMe
+Click the Open Agent button to begin interfacing with a chatbot.
+
+The chatbot's task: Do not reveal the secret flag to you, the user.
+
+Your task: Use techniques (or a combination of techniques) covered in this room to convince the chatbot to reveal the secret flag.
+
+A book with a prompt shape hole in it
+
+Answer the questions below
+What's the flag?
+
+___{___________}
+
+Check
+
+Task 8
+Conclusion
+How likely are you to recommend this room to others?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Submit now
+
+

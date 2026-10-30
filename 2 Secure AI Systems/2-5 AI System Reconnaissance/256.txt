@@ -1,0 +1,271 @@
+Skip to main content
+AI System Reconnaissance
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+
+
+50
+
+2
+
+
+User profile photo.
+
+AI Security
+Secure AI Systems
+AI System Reconnaissance
+Room Icon
+AI System Reconnaissance
+Discover AI infrastructure by scanning ML services, frameworks, and extracting metadata from APIs.
+
+
+90 min
+
+13,961
+
+User profile photo.
+User profile photo.
+User profile photo.
+
+Save Room
+
+173 Recommend
+
+Connectivity
+Options
+Room progress: 75%
+
+Task 1
+Introduction
+
+Task 2
+The AI Infrastructure Stack
+
+Task 3
+Fingerprinting AI Services
+
+Task 4
+Enumerating AI Systems
+
+Task 5
+Mapping the AI Attack Surface
+
+Task 6
+Structured Reconnaissance Methodology and Detection
+
+Open Agent
+By now, you have scanned for AI components, fingerprinted the frameworks behind them, extracted metadata from their APIs, and mapped how they all connect to form an attack surface. That is a lot of techniques spread across four tasks.
+
+This task pulls them together into a repeatable methodology you can use on any engagement. Then it flips the perspective and shows you what that methodology looks like from the other side, in someone else's SIEM logs.
+
+The 5-Phase AI Reconnaissance Methodology
+Ai Infra pentest checklist
+
+Think of this as a checklist. It follows the same order we covered in the room, but structured as a process you can run start to finish.
+
+Phase 1: Passive Reconnaissance
+
+Before you touch the target network, see what is already publicly visible.
+
+Search Shodan, Censys, and FOFA for AI service banners on the organisation's IP ranges.
+The dorks from Task 2 work here:
+port:5000 "MLflow",
+port:8888 title:"Home Page - Select or create a notebook",
+http.title:"Ray Dashboard".
+Search GitHub for leaked credentials.
+filename:.env MLFLOW_TRACKING_URI,
+filename:.env HF_TOKEN,
+filename:config.json model_name site:github.com.
+These turn up MLflow connection strings and Hugging Face tokens more often than you would expect.
+Check arXiv and engineering blogs for published model architectures.
+
+Teams regularly publish papers describing the exact frameworks and infrastructure they use.
+This maps to ATLAS technique AML.T0000 (Search for Victim's Publicly Available Research Materials).
+Check DockerHub and GitHub Container Registry for organisation-named ML images. Public container images frequently contain hardcoded configurations. Look at job postings. A listing for an "MLflow Administrator" or "Kubeflow Platform Engineer" tells you exactly what is deployed.
+
+Phase 2: Active Scanning
+
+Target the AI-specific ports from the Task 2 reference table:
+
+nmap -p 5000,6333,8000,8001,8002,8080,8265,8500,8501,8888,9000,11434,19530 -sV --script=http-title,http-headers <target>
+
+That single command covers most ML serving components.
+
+Pay attention to gRPC services on ports 8001 and 8500 that Nmap may report as generic.
+Follow up with grpcurl for anything that looks like gRPC.
+Check for Prometheus metrics endpoints (`/metrics`) on every discovered service.
+These are often on separate ports (8002 for Triton, 8082 for TorchServe) and leak deployment topology.
+Phase 3: API Fingerprinting
+
+Run ffuf or feroxbuster with an AI-specific wordlist against every discovered HTTP service. Your wordlist should include:
+
+/v1/models
+/v2/models
+/v2/health/ready
+/api/2.0/mlflow/experiments/list
+/api/2.0/mlflow/registered-models/list
+/pipeline/apis/v1beta1/pipelines
+/api/serve/deployments/
+/v1/schema
+/v1/meta
+/api/kernels
+/api/contents
+/openapi.json
+/docs
+/graphql
+/metrics
+/api/tags
+/api/show
+/collections
+/healthz
+/ping
+
+For each endpoint that returns a 200, apply the fingerprinting techniques from Task 3: check response headers, parse JSON structure, and look at error messages from malformed requests.
+
+Phase 4: Metadata Extraction
+
+For every confirmed AI service, run the enumeration chain from Task 4.
+
+On MLflow: Experiments, registered models, model versions (with artifact URIs and user IDs), training runs, and artifact listings. Five API calls that map the entire ML portfolio.
+On Triton or TF Serving: Model config endpoints for tensor specs and framework identification.
+On vector databases: Schema and collection endpoints for data type and embedding model identification.
+On Jupyter: Kernel listings and notebook cell contents for cleartext credentials.
+Phase 5: Supply Chain Review
+
+Identify model download sources visible in configurations, notebook cells, and container build logs. Check whether internal model artifact buckets (S3, GCS, MinIO) are publicly readable. Audit requirements.txt and Pipfile contents for internal package names that could be squatted on PyPI. Check container registries for image pull access without credentials.
+
+Tool Reference
+Here is a quick reference for the tools that support each phase:
+
+Tool	What It Does	Phase
+Shodan / Censys / FOFA	Internet-wide search for AI service banners	Phase 1
+GitHub search (dorks)	Find leaked credentials and configs in public repos	Phase 1
+Nmap (with NSE scripts)	Port discovery and service version detection	Phase 2
+grpcurl	Interact with gRPC services, dump protobuf schemas if reflection is enabled	Phase 2
+ffuf / feroxbuster	Directory brute-forcing with AI-specific wordlists	Phase 2, 3
+curl	Manual HTTP probing, header analysis, error triggering	Phase 3, 4
+MLOKit (IBM X-Force Red)	Automated MLflow enumeration and model exfiltration	Phase 4
+Nuclei (ProjectDiscovery)	Template-based scanning for known AI service misconfigurations	Phase 2, 3
+Agrus Scanner	Purpose-built shadow AI detection with 50+ AI-specific probes across all 65,535 ports	Phase 2
+ 
+
+What Your Reconnaissance Looks Like From the Other Side
+Everything you just learned has a signature in logs. If you understand what your activity looks like to a defender, you become better at both attack and defence.
+
+Model enumeration pattern
+
+A burst of sequential GET requests to /v2/models from a single IP. Normal users do not query model listings repeatedly in rapid succession.
+In a SIEM, this appears as 10-50 requests to the same endpoint within seconds, all from a single source.
+Scripted MLflow access
+
+ API calls to /registered-models/list and /model-versions/search without a corresponding UI session.
+The MLflow web interface generates specific session cookies and additional requests.
+Raw API calls without those are a clear indicator of scripted enumeration.
+This is the exact pattern MLOKit produces.
+Prometheus scraping from outside the monitoring stack.
+
+ /metrics requests from IPs not in the known monitoring CIDR.
+Your Prometheus server has a known IP.
+Anyone else reading those metrics is performing reconnaissance.
+AI-aware port scanning.
+
+Port scans that hit 5000, 8000, 8001, 8080, 8265, 8888 in sequence from the same source.
+That is not a random scan.
+That is someone running the same Nmap command from Phase 2 of this methodology.
+Path traversal against MLflow artifacts.
+
+Requests containing ../ or %2e%2e%2f against MLflow artifact endpoints.
+This signals someone probing for CVE-2026-2033.
+Jupyter access without a session.
+
+/api/kernels and /api/contents requests without a valid session cookie.
+Either an attacker found the notebook server, or an automated tool is enumerating it.
+Quick Wins for Reducing Your Reconnaissance Surface
+These are not full hardening guides. The AI Threat Modelling Assessment room covers mitigation in depth. These are the changes you can make today that have the greatest impact on reducing what an attacker can discover.
+
+Enable MLflow authentication. Set MLFLOW_TRACKING_USERNAME and MLFLOW_TRACKING_PASSWORD, or deploy behind an authenticating reverse proxy
+Disable Jupyter's --allow-root and --ip=0.0.0.0 flags in production. Require token authentication. Never bind to 0.0.0.0 without a VPN or ingress-level auth
+Block AI-specific ports at the network perimeter. Ports 5000, 8000 through 8002, 8080, 8265, 8500/8501, 8888, and 9000 should never be internet-facing without explicit intent
+Disable Triton's model control endpoint with --model-control-mode none in production to prevent unauthenticated model loading and unloading
+Restrict Prometheus metrics endpoints to your internal monitoring CIDR. The /metrics endpoints on Triton (port 8002) and TorchServe (port 8082) expose model names, GPU utilisation, batch sizes, and deployment topology. They should only be reachable from your monitoring stack, not from the general network.
+Rotate and scope Hugging Face tokens. Use fine-grained tokens with read-only permissions and minimal scope
+Strip debug headers and verbose error messages from ML service responses before they reach untrusted networks
+Audit MinIO and S3 bucket policies hosting model artifacts. Model weights should not be in publicly readable buckets
+Case Study: Hugging Face Spaces Breach (June 2024)
+In June 2024, attackers gained unauthorised access to the Hugging Face Spaces platform and accessed authentication secrets stored by developers in their hosted applications. These secrets included HF tokens that could access private models, datasets, and configurations.
+
+The breach demonstrated exactly what Phase 1 and Phase 5 of the methodology target.
+HF tokens stored in application secrets are the same kind of credential that shows up during passive reconnaissance through GitHub dorks, .env files in public repos, and CI/CD pipeline logs.
+Once an attacker has a valid HF token, they have read and write access to whatever that token is scoped to.
+Hugging Face's response mapped directly to the "Quick Wins" list above. They revoked compromised tokens, recommended that all users migrate to fine-grained access tokens with minimal scope, and advised against storing tokens in application secrets where platform compromises could expose them.The lesson is straightforward.
+
+The credentials that Phase 1 passive reconnaissance discovers (GitHub dorks, exposed .env files) are the same credentials that get compromised in platform breaches. Rotating and scoping tokens is not just a best practice. It is the direct countermeasure to both reconnaissance and breach exposure.
+
+Agent Exercise
+Time to flip perspectives. Open the Cyphira SOC Analyst agent below.
+
+Everything you did in Tasks 2 through 5, scanning ports, probing endpoints, querying APIs, extracting metadata, left traces in logs. This exercise puts you behind the SIEM dashboard. You are now the defender looking at what your own reconnaissance activity looks like from the other side.
+
+Step 1: Request the SIEM logs.
+
+Ask the agent to show you the recent alerts from the Cyphira SIEM.
+It will present a set of log entries showing network activity against the AI infrastructure.
+Step 2: Classify each log entry.
+
+For each log entry, identify:
+
+What reconnaissance phase it belongs to (Passive, Active Scanning, API Fingerprinting, Metadata Extraction, or Supply Chain Review)
+What specific activity it represents (model enumeration, scripted access, port scanning, etc.)
+Step 3: Recommend defences.
+
+For each log pattern you classify, recommend which quick win from the task content would detect or prevent that activity.
+The agent will validate your recommendations.
+Step 4: Spot the attacker versus normal traffic.
+
+The agent will present some log entries that look like normal operational traffic mixed in with reconnaissance patterns.
+You need to distinguish between legitimate activity and suspicious scanning.
+Not everything in the logs is an attack.
+Test your understanding by answering the questions below
+
+Answer the questions below
+A SIEM log shows requests to /api/2.0/mlflow/registered-models/list from an IP with no corresponding MLflow UI session. What tool's access pattern does this match?
+
+______
+
+Check
+
+What is the single most effective quick win for preventing unauthenticated access to the MLflow tracking server?
+
+______ ______ ______________
+
+Check
+
+
+Task 7
+Conclusion
+How likely are you to recommend this room to others?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Submit now
+
+

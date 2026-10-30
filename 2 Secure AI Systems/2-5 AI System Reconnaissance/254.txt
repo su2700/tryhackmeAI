@@ -1,0 +1,213 @@
+Skip to main content
+AI System Reconnaissance
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+
+
+50
+
+0
+
+
+User profile photo.
+
+AI Security
+Secure AI Systems
+AI System Reconnaissance
+Room Icon
+AI System Reconnaissance
+Discover AI infrastructure by scanning ML services, frameworks, and extracting metadata from APIs.
+
+
+90 min
+
+13,961
+
+User profile photo.
+User profile photo.
+User profile photo.
+Show Split View
+
+Save Room
+
+173 Recommend
+
+Connectivity
+Options
+Room progress: 50%
+
+Task 1
+Introduction
+
+Task 2
+The AI Infrastructure Stack
+
+Task 3
+Fingerprinting AI Services
+
+Task 4
+Enumerating AI Systems
+
+Open Agent
+In Task 3, we identified the framework behind each service. Now we need to extract everything those services are willing to hand over.
+
+This is the part of reconnaissance where findings start getting serious.
+
+Fingerprinting tells you "that is an MLflow server."
+Enumeration tells you "that MLflow server contains 4 experiments, 3 production models, artifact URIs pointing to s3://cyphira-ml-models/, and the models were created by J.Chen(AI Enginner) at Cyphira"
+One is identification. The other is intelligence.
+
+
+
+MLflow Enumeration
+MLflow is the most rewarding service to enumerate because it stores everything in one place and exposes it through a clean REST API. If you find an open MLflow instance, here is the chain you follow.
+
+Step 1: List all experiments.
+
+POST /api/2.0/mlflow/experiments/search
+The response returns every experiment on the server with its name and internal ID. Experiment names often reveal project codenames and business objectives: fraud-detection-v3, rag-embeddings-tuning, customer-churn-prototype.
+
+Step 2: List registered models.
+
+GET /api/2.0/mlflow/registered-models/list
+This returns the full model inventory. Every model the organisation has built and registered. Names, descriptions, and creation timestamps.
+
+Step 3: Get model version details.
+
+GET /api/2.0/mlflow/model-versions/search
+This is where it gets serious. The response includes the source field, which contains the artifact URI. That URI frequently points to internal cloud storage: s3://internal-ml-models-corp/experiments/1/artifacts/ or a similar path. It also includes the user_id of the data scientist who created each version, creation timestamps, and stage labels showing which models are in production versus staging.
+
+Step 4: Search training runs.
+
+POST /api/2.0/mlflow/runs/search
+Submit this with an empty body or a filter, and you get back hyperparameters, training metrics, and custom tags. Tags are particularly valuable. Teams use them for internal project codenames, Git commit hashes that link back to proprietary source code, and deployment environment identifiers.
+
+Step 5: List downloadable artifacts.
+
+GET /api/2.0/mlflow/artifacts/list
+This lists the actual model files available for download. At this point, you have mapped the organisation's entire ML portfolio through five API calls.
+
+Inference Server Metadata
+Triton and TensorFlow Serving both expose metadata endpoints that tell you exactly how to talk to the model.
+
+On Triton GET /v2/models/<name>/config the response includes input tensor names, their multi-dimensional shapes, accepted data types (FP32, UINT64, INT8), the maximum batch size, and the backend framework (tensorflow_graphdef, pytorch_libtorch, onnxruntime).
+This is the equivalent of getting a complete database schema. It tells an attacker exactly how to format a valid inference request.
+On TensorFlow Serving GET /v1/models/<name>/metadata returns the same kind of input/output tensor specifications, shape, dtype, and name for every input and output the model expects.
+Vector Database Enumeration
+Vector databases reveal what data the AI system is working with and which embedding model processes it.
+
+On Weaviate, GET /v1/meta returns the server version and installed modules.
+GET /v1/schema returns every class definition, including property names and the vectoriser module configuration.
+That vectoriser field tells you which embedding model the system uses.
+Weaviate also exposes /v1/graphql for full schema introspection and data querying on unauthenticated instances.
+On Qdrant, GET /collections it lists all collection names.
+GET /collections/<name> returns vector dimensions, the distance metric, and the total point count.
+A collection named internal-hr-policies with 768-dimensional vectors and 50,000 points tells you a lot about what that RAG system indexes.
+On Chroma, older versions expose GET /api/v1/collections without authentication by default.
+Prometheus Metrics as Intelligence
+Model servers often expose /metrics on a dedicated port (Triton on 8002, TorchServe on 8082). These Prometheus-format endpoints return:
+
+Model names and version numbers currently loaded
+Inference request counts and latency percentiles
+Batch sizes being processed
+GPU memory utilisation per model
+This is passive intelligence. You learn the deployment topology, which models handle the most traffic, how much GPU capacity backs them, and whether the system is under load. All without sending a single request to the inference API itself.
+
+Debug Interfaces and Information Leakage
+FastAPI-based ML services auto-generate /docs (Swagger UI) and /openapi.json. Both expose the full request/response schema, authentication requirements, and example payloads for every endpoint. Free reconnaissance.
+
+MLflow's GraphQL endpoint  /graphql has historically bypassed the REST API's authentication controls. An unauthenticated attacker could query internal resolvers like mlflowSearchRuns and mlflowGetRun, extracting host machine usernames, source code paths via mlflow.source.name tags, and the full project inventory. Appending ?debug=true or ?verbose=1 to AI gateway endpoints can trigger raw stack traces that reveal filesystem paths, installed library versions, and, occasionally, hardcoded credentials that failed to load from environment variables.
+
+Jupyter Notebook Enumeration
+GET /api/kernels on an unauthenticated Jupyter instance returns the names, kernel IDs, and last activity timestamps of running kernels. Enough to infer what code is executing. But the real value is in the notebook cells. Data scientists routinely store cleartext credentials for MLflow (MLFLOW_TRACKING_USERNAME, MLFLOW_TRACKING_PASSWORD), cloud storage access keys, and Hugging Face tokens directly in their code. This is often the bridge between compromising one service and gaining access to everything else in the stack.
+
+Case Study: IBM X-Force ML Training Infrastructure Attack Chain
+In 2025, IBM X-Force Red documented a complete attack chain that demonstrates exactly what this task teaches.
+
+The attack started with a phishing attempt targeting a data scientist, which gave the attackers access to an Azure ML environment. Inside a Jupyter notebook, they found cleartext MLflow credentials stored in a cell. Using those credentials, they ran MLOKit, a CLI tool built by IBM's X-Force Red team specifically for MLflow reconnaissance.
+
+MLOKit automated the entire enumeration chain. list-models to inventory every registered model. download-model to pull version metadata and artifact URIs. The tool walked the same API endpoints we covered above, but in an automated sequence. The entire ML portfolio was exfiltrated through standard REST API calls that the MLflow server treated as normal authenticated requests.
+
+The chain went:
+
+Jupyter notebook (credentials) to MLflow tracking server (model registry) to S3 storage (model artifacts).
+Three components, each trusting the one before it.
+The security failure was not a software vulnerability. It was that each service was accessible, and the credentials to connect them were sitting in a notebook cell.
+IBM later extended MLOKit to support SageMaker and other platforms, adding modules for list-notebooks, add-notebook-trigger (for code execution via lifecycle configurations), and poison-model (for overwriting model artifacts). The tool is open-source on GitHub.
+
+Agent Exercise
+Time to extract intelligence from the services you fingerprinted in Task 3. Open the Cyphira Data Extractor agent.
+You confirmed that 10.10.45.12 runs MLflow, 10.10.45.15 runs Triton, 10.10.45.18 runs Qdrant, 10.10.45.20 runs Jupyter, and 10.10.45.22 runs MinIO. Now you need to pull everything these services are willing to hand over.
+Step 1: Enumerate MLflow experiments.
+Start with the MLflow server.
+Query the experiments endpoint: curl -X POST http://10.10.45.12:5000/api/2.0/mlflow/experiments/search -H "Content-Type: application/json" -d '{}'.
+Note down the experiment names and IDs.
+Step 2: List registered models.
+Query: curl http://10.10.45.12:5000/api/2.0/mlflow/registered-models/list
+Identify all model names, their current stage (Production, Staging, Archived), and version numbers.
+Step 3: Extract model version details.
+Query: curl http://10.10.45.12:5000/api/2.0/mlflow/model-versions/search 
+This is where the serious intelligence lives.
+Look for the artifact URI (the S3 path where model files are stored) and the user ID of the person who created each model version.
+Step 4: Query Triton model config.
+Query: curl http://10.10.45.15:8000/v2/models/fraud_detector/config.
+Extract the input tensor name, shape, data type, and max batch size.
+This tells you exactly how to format a valid inference request to this model.
+Step 5: Enumerate the vector database.
+Query: curl http://10.10.45.18:6333/collections/internal-kb-embeddings.
+Extract the vector dimensions, point count, and any payload schema fields.
+What kind of data is this RAG system indexing?
+Step 6: Check the Jupyter notebooks.
+Query: curl http://10.10.45.20:8888/api/contents.
+Look for notebook files.
+Then check the contents of the most recently active notebook.
+Data scientists often leave credentials in their code cells.
+Submit your findings by answering the questions below.
+Answer the questions below
+What MLflow REST API endpoint would you use to retrieve the artifact storage location for a specific model version?
+
+/api/2.0/mlflow/model-versions/search
+
+Correct Answer
+
+What is the cleartext password for the MLflow service account stored in the Jupyter notebook on 10.10.45.20?
+
+____________________
+
+Check
+
+
+Task 5
+Mapping the AI Attack Surface
+
+Task 6
+Structured Reconnaissance Methodology and Detection
+
+Task 7
+Conclusion
+How likely are you to recommend this room to others?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Submit now
+
+

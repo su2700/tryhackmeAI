@@ -1,0 +1,215 @@
+{
+  "main": {
+    "id": "b3195e3bc2c6e314",
+    "type": "split",
+    "children": [
+      {
+        "id": "a93a1d6bd4634385",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "97a4a187144f193c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "2 Secure AI Systems/2-5 AI System Reconnaissance/256.zh-CN.adhd.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "256.zh-CN.adhd"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "90fad245f7a62ca0",
+    "type": "split",
+    "children": [
+      {
+        "id": "82e8c815f732c4d4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "22ea0317c6235722",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "b902d1ddc34568ac",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "107a0dccc08ab443",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "1be1a46c66283a10",
+    "type": "split",
+    "children": [
+      {
+        "id": "af1b58bd64a0c85f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0e18a01550fa00c9",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "2 Secure AI Systems/2-5 AI System Reconnaissance/256.zh-CN.adhd.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "57fbc9ccef030173",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "2 Secure AI Systems/2-5 AI System Reconnaissance/256.zh-CN.adhd.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "25b02f82f628a75c",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "f6d707e1445a0099",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "f19ed238589cccdd",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "2 Secure AI Systems/2-5 AI System Reconnaissance/256.zh-CN.adhd.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "97a4a187144f193c",
+  "lastOpenFiles": [
+    "3 Prompt Security/327.zh-CN.adhd.md",
+    "3 Prompt Security/326.zh-CN.adhd.md",
+    "3 Prompt Security/325.zh-CN.adhd.md",
+    "3 Prompt Security/324.zh-CN.adhd.md",
+    "3 Prompt Security/327.txt",
+    "3 Prompt Security/326.txt",
+    "3 Prompt Security/325.txt",
+    "3 Prompt Security/324.txt",
+    "3 Prompt Security",
+    "3 Jailbreaking",
+    "2 Secure AI Systems/2-5 AI System Reconnaissance/254.zh-CN.adhd.md",
+    "2 Secure AI Systems/2-5 AI System Reconnaissance/256.zh-CN.adhd.md",
+    "2 Secure AI Systems/2-5 AI System Reconnaissance/255.zh-CN.adhd.md",
+    "2 Secure AI Systems/2-5 AI System Reconnaissance/256.txt",
+    "vault.zh-CN.adhd.md",
+    "vault.txt",
+    "2 Secure AI Systems/2-5 AI System Reconnaissance/255.txt",
+    "2 Secure AI Systems/255.txt",
+    "2 Secure AI Systems/2-5 AI System Reconnaissance/253.zh-CN.adhd.md",
+    "2 Secure AI Systems/2-5 AI System Reconnaissance/252.zh-CN.adhd.md",
+    "2 Secure AI Systems/2-5 AI System Reconnaissance/5.zh-CN.adhd.md"
+  ]
+}
