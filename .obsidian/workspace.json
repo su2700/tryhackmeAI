@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "3 Prompt Security/Jailbreaking/327.zh-CN.adhd.md",
+                "file": "3 Prompt Security/5White Rabbit/WhiteRabbit_Attack_Plan_CN.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "327.zh-CN.adhd"
+              "title": "WhiteRabbit_Attack_Plan_CN"
             }
           }
         ]
@@ -99,7 +99,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "3 Prompt Security/Jailbreaking/327.zh-CN.adhd.md",
+                "file": "3 Prompt Security/5White Rabbit/WhiteRabbit_Attack_Plan_CN.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -118,7 +118,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "3 Prompt Security/Jailbreaking/327.zh-CN.adhd.md",
+                "file": "3 Prompt Security/5White Rabbit/WhiteRabbit_Attack_Plan_CN.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -161,7 +161,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "3 Prompt Security/Jailbreaking/327.zh-CN.adhd.md",
+                "file": "3 Prompt Security/5White Rabbit/WhiteRabbit_Attack_Plan_CN.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -190,30 +190,41 @@
   },
   "active": "97a4a187144f193c",
   "lastOpenFiles": [
-    "3 Prompt Security/Jailbreaking/326.zh-CN.adhd.md",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/429.zh-CN.adhd.md",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/428.zh-CN.adhd.md",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/427.zh-CN.adhd.md",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/426.zh-CN.adhd.md",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/425.zh-CN.adhd.md",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/427.txt",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/424.zh-CN.adhd.md",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/423.zh-CN.adhd.md",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/422.zh-CN.adhd.md",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/421.zh-CN.adhd.md",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/429.txt",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/428.txt",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/437.txt",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/426.txt",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/425.txt",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/424.txt",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/423.txt",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/422.txt",
+    "4AI Supply Chain Security/42Supply Chain Attack Vectors/421.txt",
+    "3 Prompt Security/5White Rabbit/WhiteRabbit_详细版.detail.md",
+    "3 Prompt Security/5White Rabbit/WhiteRabbit_Attack_Plan_CN.md",
+    "3 Prompt Security/4LLMborghini/341.zh-CN.adhd.md",
+    "3 Prompt Security/3 Prompt Defence/337.zh-CN.adhd.md",
+    "3 Prompt Security/3 Prompt Defence/335.zh-CN.adhd.md",
+    "3 Prompt Security/3 Prompt Defence/334.zh-CN.adhd.md",
+    "3 Prompt Security/3 Prompt Defence/333.zh-CN.adhd.md",
+    "3 Prompt Security/3 Prompt Defence/336.zh-CN.adhd.md",
     "3 Prompt Security/Jailbreaking/327.zh-CN.adhd.md",
+    "3 Prompt Security/2 Jailbreaking/327.zh-CN.adhd.md",
+    "3 Prompt Security/2 Jailbreaking/326.zh-CN.adhd.md",
+    "3 Prompt Security/2 Jailbreaking/325.zh-CN.adhd.md",
+    "3 Prompt Security/2 Jailbreaking/324.zh-CN.adhd.md",
+    "3 Prompt Security/Jailbreaking/326.zh-CN.adhd.md",
     "3 Prompt Security/Jailbreaking/325.zh-CN.adhd.md",
     "3 Prompt Security/Jailbreaking/324.zh-CN.adhd.md",
-    "3 Prompt Security/324.zh-CN.adhd.md",
-    "3 Prompt Security/Jailbreaking/325.txt",
-    "3 Prompt Security/Jailbreaking/324.txt",
-    "3 Prompt Security/Jailbreaking/327.txt",
-    "3 Prompt Security/Jailbreaking/326.txt",
-    "3 Prompt Security/Jailbreaking",
-    "3 Prompt Security/New folder",
-    "3 Prompt Security/325.zh-CN.adhd.md",
-    "2 Secure AI Systems/2-5 AI System Reconnaissance/256.zh-CN.adhd.md",
-    "3 Prompt Security/327.zh-CN.adhd.md",
-    "3 Prompt Security/326.zh-CN.adhd.md",
-    "3 Prompt Security/327.txt",
-    "3 Prompt Security/326.txt",
-    "3 Prompt Security/325.txt",
-    "3 Prompt Security/324.txt",
-    "2 Secure AI Systems/2-5 AI System Reconnaissance/254.zh-CN.adhd.md",
-    "2 Secure AI Systems/2-5 AI System Reconnaissance/255.zh-CN.adhd.md",
-    "vault.zh-CN.adhd.md",
-    "2 Secure AI Systems/2-5 AI System Reconnaissance/253.zh-CN.adhd.md",
-    "2 Secure AI Systems/2-5 AI System Reconnaissance/252.zh-CN.adhd.md",
-    "2 Secure AI Systems/2-5 AI System Reconnaissance/5.zh-CN.adhd.md"
+    "3 Prompt Security/324.zh-CN.adhd.md"
   ]
 }
