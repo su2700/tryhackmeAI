@@ -1,0 +1,100 @@
+Skip to main content
+TryHackMe | AI Supply Chain Security Training
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+1
+
+52
+
+3
+
+
+User profile photo.
+
+AI Security
+AI Supply Chain Security
+Supply Chain Attack Vectors
+Room Icon
+Supply Chain Attack Vectors
+Premium room
+Learn how trusted ML components can be turned into attack vectors.
+
+
+60 min
+
+6,425
+
+User profile photo.
+User profile photo.
+
+Save Room
+
+66 Recommend
+
+Connectivity
+Options
+Room progress: 5%
+
+Task 1
+Introduction
+
+Task 2
+Malicious Model Files
+
+Task 3
+Investigating a Malicious Model
+
+Task 4
+Dependency Confusion Attacks
+
+Task 5
+Model Repository Attacks
+
+Task 6
+When Vectors Combine
+
+Task 7
+API Provider Compromise
+
+Task 8
+Hands-On: Prompt Template Compromise
+
+Task 9
+Conclusion
+Look back at the TryTrainMe attack. The attacker did not choose between a pickle payload, a dependency confusion package, and a fake repository. They used all three simultaneously. The pickle payload was the primary entry point. The dependency confusion package was the backup. The fake organisation was the trust mechanism that made the download feel safe. Each vector covered a different failure mode in the victim's defences.
+
+That is the pattern. Real supply chain campaigns do not pick a single technique and hope it lands. They stack vectors across every layer they can reach: the model file, the dependencies, the repository signals, and increasingly the API supply chain that sits above all of it. The goal here is redundancy; compromise one layer, and another is already in place.
+
+Here's what you have investigated in this room: how pickle embeds code that fires on load, how a higher version number hijacks an internal package, how a professional model card launders a malicious upload, and how an API endpoint can silently swap the model behind it. These are all components of a toolkit that attackers combine. Understanding each one individually is necessary. Understanding how they combine is what lets you start thinking like a defender.
+
+Attack Vector Summary
+Vector	Mechanism	Detection Difficulty	Impact
+Pickle __reduce__	Embeds code in model files	Moderate: pickletools can reveal	Code execution on model load
+Keras Lambda/custom layers	Embeds code in model architecture	Moderate: architecture inspection	Code execution at inference time
+Dependency confusion	Hijacks internal package names	Low: version anomalies visible	Code execution on pip install
+Typosquatting	Misspelt package names	Low: name comparison reveals	Code execution on pip install
+Repository manipulation	Fake orgs, professional model cards	Moderate: reputation signals	Trusted distribution of malicious models
+API provider compromise	Silent updates, key exposure, prompt template tampering	High: no file artefact to scan	Invisible model substitution or data exfiltration
+GGUF weight-level	Backdoor fine-tuned into weights before quantisation	High: no static analysis tools available	Triggered misclassification or output manipulation
+What's Next
+Continue to the Securing the AI Supply Chain room to build the defences.
+
+Answer the questions below
+I understand AI Supply Chain Attack Vectors!
+
+No answer needed
+
+Check
+

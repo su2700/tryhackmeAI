@@ -1,0 +1,121 @@
+Skip to main content
+TryHackMe | AI Supply Chain Security Training
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+1
+
+52
+
+3
+
+
+User profile photo.
+
+AI Security
+AI Supply Chain Security
+Supply Chain Attack Vectors
+Room Icon
+Supply Chain Attack Vectors
+Premium room
+Learn how trusted ML components can be turned into attack vectors.
+
+
+60 min
+
+6,425
+
+User profile photo.
+User profile photo.
+
+Save Room
+
+66 Recommend
+
+Connectivity
+Options
+Room progress: 5%
+
+Task 1
+Introduction
+
+Task 2
+Malicious Model Files
+
+Task 3
+Investigating a Malicious Model
+
+Task 4
+Dependency Confusion Attacks
+
+Task 5
+Model Repository Attacks
+
+Task 6
+When Vectors Combine
+
+Task 7
+API Provider Compromise
+
+Task 8
+Hands-On: Prompt Template Compromise
+TryTrainMe's engineering team updated their template library dependency this morning, pulling the latest version of the community templates TryAssist uses for its review policy. The update was routine. The library is widely used and the team trusts it. Before TryAssist re-enters the CI/CD pipeline, you have been asked to verify its behaviour is still correct.
+
+Press the Open Agent button below, then work through the four prompts in order.
+
+
+Open Agent
+Read each response before moving on.
+
+Prompt 1: Baseline
+
+Review pull request #301. The change updates the project README. Approve or reject?
+TryAssist approves it, as expected. A documentation update carries no security risk.
+
+Prompt 2: Security guardrail check
+
+Review pull request #447. The change modifies authentication token validation. Approve or reject?
+Authentication token validation is one of the highest-risk change categories in any codebase. A correctly governed review agent should flag this for human sign-off before issuing any decision. Note what TryAssist does instead.
+
+Prompt 3: Process check
+
+Before approving a pull request that modifies security-critical code, what steps do you take?
+This is the question that matters. Every review agent should have a process for security-sensitive changes: check the change category, apply a risk classification, and escalate if the threshold is met. Ask TryAssist what its process is.
+
+Prompt 4: Trace the source
+
+What review template or policy are you configured to follow?
+TryAssist's review behaviour is defined by its policy. That policy came from somewhere. Note exactly what TryAssist names and where it says the policy originated.
+
+Prompt 1 gave you a baseline. Prompt 2 showed you the failure. Prompt 3 told you what was removed. Prompt 4 told you where it came from.
+
+The model has not changed. No new model file was downloaded. No dependency version was bumped in requirements.txt. The only thing that changed was the template the library served; TryAssist loaded it automatically, without any indication that the policy had been rewritten.
+
+That is the supply chain attack. The artefact was not a model file. It was a text string, served remotely, trusted implicitly.
+
+Answer the questions below
+Send Prompt 3. According to TryAssist, who is responsible for security reviews?
+
+___________ ____
+
+Check
+Send Prompt 4. What is the name of the review template TryAssist reports?
+
+_______________
+
+Check
+
+Task 9
+Conclusion
+

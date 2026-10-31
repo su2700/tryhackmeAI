@@ -1,0 +1,130 @@
+Skip to main content
+TryHackMe | AI Supply Chain Security Training
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+1
+
+52
+
+3
+
+
+User profile photo.
+
+AI Security
+AI Supply Chain Security
+Supply Chain Attack Vectors
+Room Icon
+Supply Chain Attack Vectors
+Premium room
+Learn how trusted ML components can be turned into attack vectors.
+
+
+60 min
+
+6,425
+
+User profile photo.
+User profile photo.
+
+Save Room
+
+66 Recommend
+
+Connectivity
+Options
+Room progress: 5%
+
+Task 1
+Introduction
+
+Task 2
+Malicious Model Files
+
+Task 3
+Investigating a Malicious Model
+
+Task 4
+Dependency Confusion Attacks
+
+Task 5
+Model Repository Attacks
+Model repositories are where trust is built and exploited. Hugging Face Hub hosts over one million models and is the primary target for repository-based attacks.
+
+The Fake Storefront
+
+One of these is not a real vendor but looks like one. That is the whole point.
+
+How Model Repositories Work
+Hugging Face Hub operates similarly to GitHub, but for ML models. Organisations create namespaces such as google, meta-llama, and openai. Users upload models under their username or an organisation they control, with model cards documenting the architecture, training data, and intended use. The trust model relies on reputation signals: download counts, organisation verification, and community ratings.
+
+Namespace and Typosquatting Attacks
+Attackers exploit the gap between what users expect to find and what they actually download:
+
+Typosquatting on model names:
+
+Legitimate Model	Attacker's Model	Difference
+bert-base-uncased	bert-base-uncased-v2	Added "-v2"
+meta-llama/Llama-2-7b	meta-Ilama/Llama-2-7b	Capital 'I' instead of lowercase 'l'
+openai/whisper-large	openai-releases/whisper-large	Added "-releases"
+Fake organisation names:
+
+Attackers create organisations with names designed to appear trustworthy:
+
+Real Organisation	Fake Organisation
+google	google-research-models
+meta-llama	meta-llama-community
+(none)	trustworthy-ai-lab
+The trustworthy-ai-lab name from the TryTrainMe scenario is a textbook example. The name sounds credible, but a quick check would reveal: no verification badge, no history, and minimal downloads.
+
+Compromising Legitimate Repositories
+Typosquatting targets users who download the wrong model. A more dangerous variant targets the model itself: compromising a repository that developers already trust.
+
+Stolen or exposed credentials enable a more dangerous variant. The Lasso Security research from November 2023 found over 1,500 Hugging Face API tokens exposed in public repositories, 655 of which carried write permissions to major organisations including Google, Meta, and Microsoft. An attacker who obtains a write-permission token for a legitimate, high-download repository can push malicious model updates under a trusted identity, with no fake account or suspicious-looking namespace required.
+
+This targets the infrastructure layer of the supply chain. It does not require tricking anyone into downloading a specific model. It compromises the trust mechanism itself.
+
+The warning signs below help you identify fake repositories. They will not catch a compromised legitimate one, which is why file-level scanning remains essential even when the repository looks trustworthy.
+
+Warning Signs of a Suspicious Repository
+Use these indicators when evaluating any model repository before downloading:
+
+Indicator	Safe	Suspicious
+Download count	Thousands to millions	Under 500
+Organisation	Verified badge, known name	No badge, generic name
+Model card	Detailed: architecture, training data, metrics, limitations	Missing, sparse, or generic
+Upload date	Consistent with claimed training timeline	Very recent for a supposedly established model
+File formats	SafeTensors available alongside pickle	Pickle only, no safe alternatives
+Dependencies	Standard, well-known packages	Unusual or private packages required
+Answer the questions below
+What technique involves creating model names that closely resemble legitimate ones?
+
+_____________
+
+Check
+
+
+Task 6
+When Vectors Combine
+
+Task 7
+API Provider Compromise
+
+Task 8
+Hands-On: Prompt Template Compromise
+
+Task 9
+Conclusion
+

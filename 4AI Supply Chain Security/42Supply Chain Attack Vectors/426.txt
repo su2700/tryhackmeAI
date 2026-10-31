@@ -1,0 +1,112 @@
+Skip to main content
+TryHackMe | AI Supply Chain Security Training
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+1
+
+52
+
+3
+
+
+User profile photo.
+
+AI Security
+AI Supply Chain Security
+Supply Chain Attack Vectors
+Room Icon
+Supply Chain Attack Vectors
+Premium room
+Learn how trusted ML components can be turned into attack vectors.
+
+
+60 min
+
+6,425
+
+User profile photo.
+User profile photo.
+
+Save Room
+
+66 Recommend
+
+Connectivity
+Options
+Room progress: 5%
+
+Task 1
+Introduction
+
+Task 2
+Malicious Model Files
+
+Task 3
+Investigating a Malicious Model
+
+Task 4
+Dependency Confusion Attacks
+
+Task 5
+Model Repository Attacks
+
+Task 6
+When Vectors Combine
+Malicious serialisation, dependency confusion, and repository manipulation rarely appear alone. In the TryTrainMe case, all three were deployed simultaneously. Attackers combine them for redundancy: if one vector is blocked, another is already in place. Let's trace exactly how they converged.
+
+Investigation Evidence Board
+
+The investigation board. Connecting the evidence from pickle payloads, fake organisations, dependency confusion, and C2 beacons reveals the complete picture of the TryTrainMe compromise.
+
+The TryTrainMe Timeline
+Week	Event
+Week 1	Attacker registers fake "trustworthy-ai-lab" organisation on Hugging Face and uploads a backdoored model with a pickle payload. Simultaneously publishes internal-ml-utils==99.0.0 to PyPI to intercept TryTrainMe's internal package name.
+Week 2	TryTrainMe engineer downloads the model as a replacement for the code review pipeline. pickle.load() fires silently on first load; a C2 beacon connects to an eternal domain.
+Week 3	A routine pip install -r requirements.txt pulls the attacker's PyPI package. A second foothold is established independently of the model file.
+Detection	SOC automated alert flags repeated outbound HTTPS connections to an unrecognised domain. The CEO receives the email.
+Multiple Entry Points, Single Goal
+Notice how the attacker prepared multiple attack vectors:
+
+Vector	Mechanism	Purpose
+Pickle payload	__reduce__ calling os.system	Primary entry: executes on model load
+Dependency confusion	internal-ml-utils==99.0.0 on PyPI	Backup entry: executes on pip install
+Repository manipulation	Fake "trustworthy-ai-lab" org	Social engineering: builds trust for the download
+Even if one vector fails (e.g., the victim's model loader blocks code execution), another vector may succeed (e.g., the dependency confusion package installs and executes).
+
+Keep in mind: Supply chain attacks are effective because they offer attackers multiple independent paths to code execution. Defending against one vector is not enough; you need layered defences across every attack surface.
+
+Answer the questions below
+The attacker created the trustworthy-ai-lab organisation on Hugging Face to make the model download appear safe. Which of the three attack vectors in the table does this represent?
+
+__________ ____________
+
+Check
+
+If TryTrainMe's model loader had blocked the pickle payload, which second vector would still have given the attacker code execution?
+
+__________ _________
+
+Check
+
+
+Task 7
+API Provider Compromise
+
+Task 8
+Hands-On: Prompt Template Compromise
+
+Task 9
+Conclusion
+

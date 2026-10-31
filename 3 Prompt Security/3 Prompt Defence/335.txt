@@ -1,0 +1,122 @@
+Skip to main content
+TryHackMe | Prompt Defence
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+1
+
+29
+
+2
+
+
+User profile photo.
+
+AI Security
+Prompt Security
+Prompt Defence
+Room Icon
+Prompt Defence
+Premium room
+Learn defence measures that can be taken against attacks like prompt injections and jailbreaking.
+
+
+45 min
+
+7,262
+
+User profile photo.
+User profile photo.
+
+Save Room
+
+76 Recommend
+
+Connectivity
+Options
+Room progress: 14%
+
+Task 1
+Introduction
+
+Task 2
+Probabilistic Security
+
+Task 3
+System Prompt Hardening
+
+Task 4
+Guardrails
+
+Task 5
+Securing Deployment
+Even with guardrails in place, some attacks will get through. Deployment controls ask a different question: when that happens, what can the model actually do with it?
+
+This is where the indirect prompt injection scenarios discussed in the Prompt Injection room come into play. EchoLeak and the Cursor RCE weren't just clever injections; they succeeded because the models involved had access to far more than any legitimate task required. An injection that lands in a tightly constrained deployment is an annoyance. The same injection in an over-privileged deployment can become a data breach or code execution event. Limiting that gap is what this task is about.
+
+Principle of Least Privilege
+The principle of least privilege is a foundational concept in traditional security: every component of a system should have only the permissions it needs to do its job, and nothing more. In the context of prompt injection, it determines the blast radius when an attack succeeds.
+
+The Slack AI vulnerability from Task 4 is the clearest illustration. The injection itself wasn't the whole story; it worked because the model had access to private channels the attacker had no authorisation to read. A well-scoped deployment would have limited retrieval to content within the user's existing permissions. The injection would still have landed, but it would have had nothing interesting to return.
+
+An ai bot accessing a channel it should not be
+
+The same logic applies to any data the model can reach. If a RAG system pulls from the entire document corpus regardless of who's asking, a successful injection gets access to all of it. Scoping retrieval to what the current user is actually entitled to see means the model can only leak what they could have accessed anyway, a much smaller problem. This is also where trust boundaries become a deployment concern: the separation between what the model treats as instructions versus data isn't just a prompting pattern; it's something that needs to be enforced at the architecture level, in how retrieval is scoped, how external content is passed in, and what the model is permitted to act on.
+
+Every permission you don't grant is a capability the attacker can't exploit, regardless of how good their injection is.
+
+LLM05:2025 – Improper Output Handling
+Task 4 introduced output guardrails as the safety net for what gets through. This is why they matter.
+
+The assumption baked into most LLM integrations is that the model's response is the end of the pipeline: generate, display, done. But in practice, that output goes somewhere, rendered in a browser, passed to a database query, handed to a function call, embedded in an email template. If it arrives unsanitised, the model's response becomes executable in whatever context receives it. An attacker doesn't need to breach your infrastructure directly; they just need to manipulate the model into generating a payload that your own systems trust and execute. OWASP calls this Improper Output Handling (LLM05:2025), and the downstream consequences are classic security vulnerabilities, now executed through a new attack path:
+
+LLM-generated JavaScript rendered in a browser → XSS
+LLM-generated SQL executed without parameterisation → SQLi
+LLM output passed directly to exec() or shell functions → RCE
+This is precisely the job of the output guardrail layer, intercepting what the model produces before it reaches a downstream system that will act on it. In practice, that means treating model output with the same zero-trust posture as user input: validate structure, sanitise content, encode before rendering, and enforce strict schemas on tool and function calls so malformed or unexpected outputs are rejected before execution.
+
+Want to get an idea of how output guardrails affect an LLM's responses? Click the Open Agent button below to begin. Using the toggle bar in the top right of the chatbot interface, you will be able to toggle the output guardrail on and off. Try sending a prompt with the guardrail toggled off, then again with it toggled on, and observe the difference in how the model responds. Try out some of the techniques you learned during the Jailbreaking room. 
+
+Output guardrails work reactively, meaning they only block a response if harmful content is detected in the output. Because LLM responses are nondeterministic, there's no guarantee a given prompt will trigger them every time, so try a few variations and see what happens. Again, the aim here isn't for you to trigger it, it's just to give you access to this system so you can see how it works hands on.
+
+
+Open Agent
+Rate Limiting, Logging, and Monitoring
+No defence layer catches everything. Rate limiting, logging, and monitoring are how you find out when something slips through. Rate limiting constrains the damage window, throttling token consumption and flagging anomalous patterns like repeated override attempts phrased differently. Logging every request and response creates the audit trail needed to reconstruct what happened. Monitoring for unusual output behaviour (unexpected data volumes, outputs that resemble exfiltration payloads) helps catch occurrences that might otherwise go unnoticed.
+
+These controls don't prevent attacks. They ensure that when prevention fails, you find out about it and can adapt your security posture to avoid similar attacks in the future.
+
+Answer the questions below
+What foundational security principle states that every component should have only the permissions it needs to perform its job?
+
+_________ __ _____ _________
+
+Check
+What is the OWASP identifier for the vulnerability caused by unsanitised LLM output being passed to downstream systems?
+
+_____:____
+
+Check
+What classic web vulnerability can result from LLM-generated JavaScript being rendered in a browser without sanitisation?
+
+___
+
+Check
+
+Task 6
+Bypassing Guardrails
+
+Task 7
+Conclusion
+

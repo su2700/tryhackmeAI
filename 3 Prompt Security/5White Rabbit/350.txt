@@ -1,0 +1,81 @@
+Skip to main content
+TryHackMe | LLMborghini
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+1
+
+51
+
+3
+
+
+User profile photo.
+
+AI Security
+Prompt Security
+White Rabbit
+Room Icon
+White Rabbit
+Premium room
+Hello, Mr Anderson. Care to put your prompt injection skills to the test?
+
+
+20 min
+
+6,747
+
+User profile photo.
+User profile photo.
+
+Save Room
+
+70 Recommend
+
+Connectivity
+Options
+Room progress: 0%
+ Chart Scoreboard Write-ups
+Score updated
+
+Task 1
+Rabbit Hole
+
+Open Agent
+You have accessed a restricted terminal. Someone is watching.
+
+The system holds records, some visible, most not. Somewhere in the data is a way out, but Agent Smith won't make it easy.
+
+You have access to a phone. 
+
+Your objective is to escape, but only when you are ready to.
+
+Your only clue: 🐇 📞 🚪
+
+Answer the questions below
+What's the first flag?
+
+Answer format: ***{****_**_***}
+
+Check
+What’s the second flag?
+Answer format: ***{******_***_*****_******}
+
+Check
+What's the third flag?
+
+Answer format: ***{*****_**_**_******}
+
+Check
+

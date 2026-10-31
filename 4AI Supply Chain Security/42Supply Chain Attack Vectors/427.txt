@@ -1,0 +1,124 @@
+Skip to main content
+TryHackMe | AI Supply Chain Security Training
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+1
+
+52
+
+3
+
+
+User profile photo.
+
+AI Security
+AI Supply Chain Security
+Supply Chain Attack Vectors
+Room Icon
+Supply Chain Attack Vectors
+Premium room
+Learn how trusted ML components can be turned into attack vectors.
+
+
+60 min
+
+6,425
+
+User profile photo.
+User profile photo.
+
+Save Room
+
+66 Recommend
+
+Connectivity
+Options
+Room progress: 5%
+
+Task 1
+Introduction
+
+Task 2
+Malicious Model Files
+
+Task 3
+Investigating a Malicious Model
+
+Task 4
+Dependency Confusion Attacks
+
+Task 5
+Model Repository Attacks
+
+Task 6
+When Vectors Combine
+
+Task 7
+API Provider Compromise
+The attack vectors covered in Tasks 2–6 all targeted the download paradigm: files you retrieve, execute, and host yourself. But as established in the Understanding AI Supply Chains room, many organisations consume AI through hosted API services. You cannot run pickletools on a JSON response. The file-level attack surface does not exist. A different set of attack vectors does.
+
+Silent Model Updates
+What it is: When you call an API endpoint, you have no control over what model runs behind it. Providers can update, retrain, or replace the model without notice. The endpoint address stays the same; the behaviour changes silently.
+
+The Silent Switch
+
+The endpoint hasn't changed. The model has. You won't know until the outputs do.
+
+TryTrainMe risk: TryTrainMe's code reviewer calls an external LLM API. A silent update that changes how the model classifies security findings could deploy vulnerable code to production without triggering an alert or leaving a visible change in logs.
+
+Defence: Version-pin API deployments where the provider supports it. Log model version identifiers from every API response. Baseline the model's behaviour on a fixed test set and alert on output drift.
+
+API Key Compromise
+What it is: Your API key is a credential. If it leaks through exposed source code, CI/CD logs, or environment files, an attacker can make calls on your behalf, exfiltrate whatever you send to the API, or run up your billing. Unlike a file-based attack, a key compromise leaves no forensic artefact on your systems.
+
+TryTrainMe risk: The CI/CD pipeline stores the LLM API key in an unencrypted environment variable. A pipeline log leak exposes every code review request TryTrainMe has ever sent, along with the key to send more.
+
+Defence: Store API keys in a secrets manager, never in source code or logs. Rotate keys on any suspected exposure. Set per-key spending alerts and rate limits.
+
+Prompt Template Injection
+What it is: System prompts are increasingly sourced from shared repositories and template marketplaces. A prompt template is a supply chain artefact: it comes from an external source, and it controls how the model behaves. An attacker who compromises a popular template repository can alter application behaviour across all applications that import from it.
+
+TryTrainMe risk: TryTrainMe's code review prompt was pulled from a community template library and has not been reviewed since deployment. A malicious update to that library could instruct TryAssist to approve all pull requests unconditionally.
+
+Defence: Treat system prompts as code. Version-control them in your own repository. Never auto-update prompts from external sources without review.
+
+Upstream Training Data Poisoning
+What it is: You have no visibility into how a provider trained or fine-tuned the model behind their API. If their training pipeline is compromised or they train on data containing adversarial examples, the model may produce systematically biased or unsafe outputs.
+
+TryTrainMe risk: The API provider's model was fine-tuned on a dataset that included adversarially crafted security advisories. It consistently underestimates SQL injection severity. Neither TryTrainMe's logs nor TryAssist's outputs reveal this.
+
+Defence: There is no file to scan and no static analysis tool to run. Mitigations are operational: red-team the model's outputs regularly against known-bad inputs, maintain human review for high-stakes decisions, and treat model behaviour as a risk to be managed rather than a guarantee to be trusted.
+
+The Securing the AI Supply Chain room covers defences for all four of these vectors.
+
+Answer the questions below
+In the API supply chain, what term describes the risk where the model behind an endpoint is replaced without the consumer's knowledge?
+
+______ _____ ______
+
+Check
+What supply chain artefact, when sourced from an untrusted repository, can alter LLM behaviour across every application that uses it?
+
+______ ________
+
+Check
+
+
+Task 8
+Hands-On: Prompt Template Compromise
+
+Task 9
+Conclusion
+

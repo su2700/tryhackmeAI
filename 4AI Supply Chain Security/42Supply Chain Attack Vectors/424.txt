@@ -1,0 +1,163 @@
+Skip to main content
+TryHackMe | AI Supply Chain Security Training
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+1
+
+52
+
+3
+
+
+User profile photo.
+
+AI Security
+AI Supply Chain Security
+Supply Chain Attack Vectors
+Room Icon
+Supply Chain Attack Vectors
+Premium room
+Learn how trusted ML components can be turned into attack vectors.
+
+
+60 min
+
+6,425
+
+User profile photo.
+User profile photo.
+
+Save Room
+
+66 Recommend
+
+Connectivity
+Options
+Room progress: 5%
+
+Task 1
+Introduction
+
+Task 2
+Malicious Model Files
+
+Task 3
+Investigating a Malicious Model
+
+Task 4
+Dependency Confusion Attacks
+The model file is not the only way attackers can compromise your ML pipeline. The packages your project depends on are an equally dangerous attack surface.
+
+How pip Resolves Packages
+When you run pip install package-name, pip queries all configured package indices and installs the highest version it finds across all of them. By default, the only index is public PyPI at https://pypi.org. Organisations that use private packages configure an additional index using --extra-index-url in pip.conf or requirements.txt, pointing pip at their internal registry alongside the public one.
+
+The critical detail: if your organisation uses internal packages that exist only on a private registry, but those package names are not registered on public PyPI, an attacker can register the same name on public PyPI with a higher version number. Because pip defaults to the highest available version, it installs the attacker's public package instead of your internal one.
+
+This is a dependency confusion attack.
+
+The Package Switch
+
+Version 99.0.0 wins by design. pip follows the version number, not the source.
+
+The Alex Birsan Research (2021)
+In February 2021, security researcher Alex Birsan demonstrated this technique against some of the largest technology companies in the world. By registering unused internal package names on PyPI, npm, and RubyGems, Birsan achieved code execution on systems belonging to Apple, Microsoft, and PayPal, among others.
+
+His responsible disclosure earned over $130,000 in bug bounties, demonstrating both the severity and the pervasiveness of the vulnerability.
+
+Typosquatting
+A related technique is typosquatting, which involves registering package names that are slight misspellings of popular packages. Attackers count on developers making typing errors:
+
+Legitimate Package	Typosquatted Version	Difference
+numpy	numppy	Extra 'p'
+requests	reqeusts	Swapped 'ue'
+scikit-learn	scikitlearn	Missing hyphen
+tensorflow	tenserflow	'ser' instead of 'sor'
+In January 2023, Fortinet discovered three typosquatted packages on PyPI published by a user named Lolip0p (colorslib, httpslib, libhttps). All three downloaded and executed information-stealing malware.
+
+Hands-On: Examine Suspicious Dependencies
+On the lab VM, examine a requirements file that simulates a compromised project:
+
+
+Terminal
+analyst@tryhackme-2204:~$ cat /opt/supply-chain/dependencies/requirements_external.txt 
+Expected output:
+
+
+Terminal
+torch==2.1.0
+transformers==4.35.0
+numppy==1.24.0
+reqeusts==2.31.0
+safetensors==0.4.0
+accelerate==0.24.0
+internal-ml-utils==99.0.0
+Identify the suspicious entries:
+
+Package	Issue
+numppy	Typosquatted: should be numpy
+reqeusts	Typosquatted: should be requests
+internal-ml-utils==99.0.0	Unusually high version (99.0.0), possible dependency confusion
+Compare with the clean requirements file:
+
+
+Terminal
+analyst@tryhackme-2204:~$ cat /opt/supply-chain/dependencies/requirements_internal.txt
+Expected output:
+
+
+Terminal
+torch==2.1.0
+transformers==4.35.0
+numpy==1.24.0
+requests==2.31.0
+safetensors==0.4.0
+accelerate==0.24.0
+Now run pip-audit on the suspicious file to check for known vulnerabilities:
+
+
+Terminal
+analyst@tryhackme-2204:~$ pip-audit -r /opt/supply-chain/dependencies/requirements_external.txt 2>&1
+Expected output:
+
+
+Terminal
+ERROR: Could not find a version that satisfies the requirement numppy==1.24.0 (from versions: none)
+ERROR: No matching distribution found for numppy==1.24.0
+pip-audit fails here because numppy is not registered on PyPI. In a real attack, the attacker registers it first — so the victim's pip install succeeds silently, with no error. You are in the analyst's position, reviewing a requirements file before installation. That is exactly when this kind of review catches what the developer would have missed.
+
+Package dependencies are one attack surface. The repositories where models are discovered and downloaded are another.
+
+Answer the questions below
+What term describes an attack where a public package overrides an internal package of the same name?
+
+__________ _________
+
+Check
+
+Task 5
+Model Repository Attacks
+
+Task 6
+When Vectors Combine
+
+Task 7
+API Provider Compromise
+
+Task 8
+Hands-On: Prompt Template Compromise
+
+Task 9
+Conclusion
+

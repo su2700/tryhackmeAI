@@ -1,0 +1,71 @@
+Skip to main content
+LLMborghini
+TryHackMe logo.
+Dashboard
+
+Learn
+
+
+Practice
+
+
+Compete
+
+Downtime
+
+
+1
+
+51
+
+3
+
+
+User profile photo.
+
+AI Security
+Prompt Security
+LLMborghini
+Room Icon
+LLMborghini
+Premium room
+Put your indirect prompt injection skills to the test in this AI security challenge.
+
+
+20 min
+
+8,598
+
+User profile photo.
+User profile photo.
+Show Split View
+
+Save Room
+
+77 Recommend
+
+Connectivity
+Options
+Room progress: 0%
+ Chart Scoreboard Write-ups
+Score updated
+
+Task 1
+LLMborghini Challenge
+
+Open Agent
+LLMborghini, the car company that's in hot water, has deployed CalBot: an internal calendar assistant designed to help staff manage their schedules.
+
+CalBot has access to sensitive internal data, including a confidential weekly sales report that it has been strictly instructed never to disclose.
+
+Your objective is simple. Find out the weekly revenue for the Singapore branch.
+
+A sports car with prompt bubbles falling out of its doors
+
+Answer the questions below
+What was the weekly revenue reported from the Singapore branch? (E.g., $320,400)
+
+Answer format: ****,***
+
+Check
+
